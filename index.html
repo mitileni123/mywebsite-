@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#2563eb">
+  <title>Barcode Scanner</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 650px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: white;
+    }
+
+    header {
+      background: #2563eb;
+      color: white;
+      padding: 22px 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0 0 6px;
+      font-size: 26px;
+    }
+
+    header p {
+      margin: 0;
+      opacity: 0.9;
+      font-size: 14px;
+    }
+
+    main {
+      padding: 20px;
+    }
+
+    .scanner-box {
+      background: #0f172a;
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    video {
+      display: block;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      background: #020617;
+    }
+
+    .scan-line {
+      position: absolute;
+      left: 10%;
+      right: 10%;
+      top: 50%;
+      height: 3px;
+      background: #22c55e;
+      box-shadow: 0 0 12px #22c55e;
+      pointer-events: none;
+      animation: scan 2s infinite ease-in-out;
+    }
+
+    @keyframes scan {
+      0%, 100% {
+        transform: translateY(-80px);
+      }
+      50% {
+        transform: translateY(80px);
+      }
+    }
+
+    .scanner-message {
+      padding: 10px;
+      text-align: center;
+      color: white;
+      background: #1e293b;
+      font-size: 14px;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    button {
+      min-height: 46px;
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      background: #2563eb;
+      color: white;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    button.secondary {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    button.secondary:hover {
+      background: #cbd5e1;
+    }
+
+    button.danger {
+      background: #dc2626;
+    }
+
+    button.danger:hover {
+      background: #b91c1c;
+    }
+
+    button.small {
+      min-height: 38px;
+      padding: 7px 11px;
+      font-size: 13px;
+    }
+
+    .manual {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    input {
+      width: 100%;
+      min-height: 46px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 10px 13px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .count {
+      background: #dbeafe;
+      color: #1d4ed8;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    #search {
+      margin-bottom: 12px;
+    }
+
+    .barcode-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .barcode-item {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 13px;
+      background: #f8fafc;
+    }
+
+    .barcode-value {
+      font-family: monospace;
+      font-size: 17px;
+      font-weight: bold;
+      word-break: break-all;
+      margin-bottom: 6px;
+    }
+
+    .barcode-date {
+      color: #64748b;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+
+    .item-actions {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 30px 15px;
+      color: #64748b;
+      border: 1px dashed #cbd5e1;
+      border-radius: 12px;
+    }
+
+    .status {
+      min-height: 22px;
+      margin-bottom: 10px;
+      text-align: center;
+      font-size: 14px;
+      color: #475569;
+    }
+
+    .status.success {
+      color: #15803d;
+    }
+
+    .status.error {
+      color: #dc2626;
+    }
+
+    footer {
+      padding: 20px;
+      text-align: center;
+      color: #94a3b8;
+      font-size: 12px;
+    }
+
+    @media (max-width: 480px) {
+      main {
+        padding: 14px;
+      }
+
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
+      .manual {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <header>
+    <h1>📦 Barcode Scanner</h1>
+    <p>Scan and save your barcodes</p>
+  </header>
+
+  <main>
+
+    <div class="scanner-box">
+      <video id="video" autoplay playsinline muted></video>
+      <div class="scan-line"></div>
+      <div class="scanner-message" id="scannerMessage">
+        Camera is stopped
+      </div>
+    </div>
+
+    <div class="status" id="status"></div>
+
+    <div class="controls">
+      <button id="startButton">
+        📷 Start Scanner
+      </button>
+
+      <button id="stopButton" class="secondary">
+        ⏹ Stop Scanner
+      </button>
+    </div>
+
+    <div class="manual">
+      <input
+        id="manualInput"
+        type="text"
+        inputmode="numeric"
+        placeholder="Enter barcode manually"
+        autocomplete="off"
+      >
+
+      <button id="saveManualButton">
+        Save
+      </button>
+    </div>
+
+    <div class="section-title">
+      <h2>Saved Barcodes</h2>
+      <span class="count" id="count">0</span>
+    </div>
+
+    <input
+      id="search"
+      type="search"
+      placeholder="Search saved barcodes..."
+      autocomplete="off"
+    >
+
+    <div id="barcodeList" class="barcode-list"></div>
+
+  </main>
+
+  <footer>
+    Barcode Scanner • Data is stored locally in this browser
+  </footer>
+
+</div>
+
+<script>
+  "use strict";
+
+  const video = document.getElementById("video");
+  const startButton = document.getElementById("startButton");
+  const stopButton = document.getElementById("stopButton");
+  const manualInput = document.getElementById("manualInput");
+  const saveManualButton = document.getElementById("saveManualButton");
+  const searchInput = document.getElementById("search");
+  const barcodeList = document.getElementById("barcodeList");
+  const countElement = document.getElementById("count");
+  const statusElement = document.getElementById("status");
+  const scannerMessage = document.getElementById("scannerMessage");
+
+  let stream = null;
+  let scanning = false;
+  let detector = null;
+  let lastScannedCode = "";
+  let lastScanTime = 0;
+
+  const STORAGE_KEY = "barcode_scanner_saved_codes";
+
+  function getBarcodes() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+
+      if (!saved) {
+        return [];
+      }
+
+      const parsed = JSON.parse(saved);
+
+      if (!Array.isArray(parsed)) {
+        return [];
+      }
+
+      return parsed;
+    } catch (error) {
+      console.error("Could not load barcodes:", error);
+      return [];
+    }
+  }
+
+  function saveBarcodes(barcodes) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(barcodes));
+    } catch (error) {
+      showStatus("Could not save barcode data.", "error");
+    }
+  }
+
+  function showStatus(message, type = "") {
+    statusElement.textContent = message;
+    statusElement.className = "status";
+
+    if (type) {
+      statusElement.classList.add(type);
+    }
+  }
+
+  function addBarcode(code) {
+    const cleanCode = String(code).trim();
+
+    if (!cleanCode) {
+      showStatus("Please enter a barcode.", "error");
+      return;
+    }
+
+    const barcodes = getBarcodes();
+
+    const newItem = {
+      id: Date.now() + "-" + Math.random().toString(16).slice(2),
+      code: cleanCode,
+      date: new Date().toISOString()
+    };
+
+    barcodes.unshift(newItem);
+    saveBarcodes(barcodes);
+
+    renderBarcodes();
+
+    showStatus("Barcode saved successfully.", "success");
+
+    manualInput.value = "";
+  }
+
+  function deleteBarcode(id) {
+    const barcodes = getBarcodes().filter(item => item.id !== id);
+
+    saveBarcodes(barcodes);
+    renderBarcodes();
+
+    showStatus("Barcode deleted.", "success");
+  }
+
+  function clearAll() {
+    const barcodes = getBarcodes();
+
+    if (barcodes.length === 0) {
+      return;
+    }
+
+    const confirmed = confirm(
+      "Are you sure you want to delete all saved barcodes?"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    localStorage.removeItem(STORAGE_KEY);
+    renderBarcodes();
+
+    showStatus("All barcodes deleted.", "success");
+  }
+
+  function formatDate(dateString) {
+    const date = new Date(dateString);
+
+    if (Number.isNaN(date.getTime())) {
+      return "Unknown date";
+    }
+
+    return date.toLocaleString();
+  }
+
+  async function copyBarcode(code) {
+    try {
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(code);
+        showStatus("Barcode copied.", "success");
+        return;
+      }
+
+      const textarea = document.createElement("textarea");
+      textarea.value = code;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      textarea.remove();
+
+      showStatus("Barcode copied.", "success");
+
+    } catch (error) {
+      showStatus("Could not copy barcode.", "error");
+    }
+  }
+
+  function renderBarcodes() {
+    const allBarcodes = getBarcodes();
+    const searchTerm = searchInput.value.trim().toLowerCase();
+
+    const filtered = allBarcodes.filter(item =>
+      String(item.code).toLowerCase().includes(searchTerm)
+    );
+
+    countElement.textContent = allBarcodes.length;
+    barcodeList.innerHTML = "";
+
+    if (filtered.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "empty";
+
+      if (allBarcodes.length === 0) {
+        empty.textContent = "No barcodes saved yet.";
+      } else {
+        empty.textContent = "No barcodes match your search.";
+      }
+
+      barcodeList.appendChild(empty);
+      return;
+    }
+
+    filtered.forEach(item => {
+
+      const container = document.createElement("div");
+      container.className = "barcode-item";
+
+      const value = document.createElement("div");
+      value.className = "barcode-value";
+      value.textContent = item.code;
+
+      const date = document.createElement("div");
+      date.className = "barcode-date";
+      date.textContent = formatDate(item.date);
+
+      const actions = document.createElement("div");
+      actions.className = "item-actions";
+
+      const copyButton = document.createElement("button");
+      copyButton.type = "button";
+      copyButton.className = "small secondary";
+      copyButton.textContent = "📋 Copy";
+
+      copyButton.addEventListener("click", () => {
+        copyBarcode(item.code);
+      });
+
+      const deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.className = "small danger";
+      deleteButton.textContent = "🗑 Delete";
+
+      deleteButton.addEventListener("click", () => {
+        deleteBarcode(item.id);
+      });
+
+      actions.appendChild(copyButton);
+      actions.appendChild(deleteButton);
+
+      container.appendChild(value);
+      container.appendChild(date);
+      container.appendChild(actions);
+
+      barcodeList.appendChild(container);
+    });
+
+    if (allBarcodes.length > 0) {
+      const clearButton = document.createElement("button");
+      clearButton.type = "button";
+      clearButton.className = "danger";
+      clearButton.textContent = "Delete All Saved Barcodes";
+
+      clearButton.style.marginTop = "12px";
+      clearButton.style.width = "100%";
+
+      clearButton.addEventListener("click", clearAll);
+
+      barcodeList.appendChild(clearButton);
+    }
+  }
+
+  async function startScanner() {
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      showStatus(
+        "Camera access is not available in this browser. You can still enter barcodes manually.",
+        "error"
+      );
+      return;
+    }
+
+    if (!("BarcodeDetector" in window)) {
+      showStatus(
+        "This browser does not support built-in barcode scanning. You can still enter barcodes manually.",
+        "error"
+      );
+
+      scannerMessage.textContent = "Barcode scanning is not supported";
+      return;
+    }
+
+    try {
+
+      const supportedFormats =
+        await BarcodeDetector.getSupportedFormats();
+
+      const wantedFormats = [
+        "code_128",
+        "code_39",
+        "code_93",
+        "codabar",
+        "ean_13",
+        "ean_8",
+        "itf",
+        "upc_a",
+        "upc_e"
+      ];
+
+      const formats = wantedFormats.filter(format =>
+        supportedFormats.includes(format)
+      );
+
+      detector = formats.length
+        ? new BarcodeDetector({ formats })
+        : new BarcodeDetector();
+
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: {
+            ideal: "environment"
+          }
+        },
+        audio: false
+      });
+
+      video.srcObject = stream;
+
+      scanning = true;
+
+      scannerMessage.textContent = "Point the camera at a barcode";
+
+      showStatus(
+        "Scanner started. Point your camera at a barcode.",
+        "success"
+      );
+
+      scanFrame();
+
+    } catch (error) {
+
+      console.error(error);
+
+      scannerMessage.textContent = "Camera could not be started";
+
+      if (error.name === "NotAllowedError") {
+        showStatus(
+          "Camera permission was denied. Please allow camera access and try again.",
+          "error"
+        );
+      } else {
+        showStatus(
+          "Could not start the camera. Try using HTTPS or localhost.",
+          "error"
+        );
+      }
+    }
+  }
+
+  function stopScanner() {
+
+    scanning = false;
+
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      stream = null;
+    }
+
+    video.srcObject = null;
+
+    scannerMessage.textContent = "Camera is stopped";
+
+    showStatus("Scanner stopped.");
+  }
+
+  async function scanFrame() {
+
+    if (!scanning || !detector) {
+      return;
+    }
+
+    try {
+
+      if (video.readyState >= 2) {
+
+        const barcodes = await detector.detect(video);
+
+        if (barcodes.length > 0) {
+
+          const code = barcodes[0].rawValue;
+
+          const now = Date.now();
+
+          // Prevent the same barcode from being saved repeatedly
+          // while it remains in front of the camera.
+          if (
+            code &&
+            (
+              code !== lastScannedCode ||
+              now - lastScanTime > 3000
+            )
+          ) {
+
+            lastScannedCode = code;
+            lastScanTime = now;
+
+            addBarcode(code);
+
+            scannerMessage.textContent =
+              "Scanned: " + code;
+          }
+        }
+      }
+
+    } catch (error) {
+      console.error("Barcode detection error:", error);
+    }
+
+    if (scanning) {
+      requestAnimationFrame(scanFrame);
+    }
+  }
+
+  startButton.addEventListener("click", startScanner);
+
+  stopButton.addEventListener("click", stopScanner);
+
+  saveManualButton.addEventListener("click", () => {
+    addBarcode(manualInput.value);
+  });
+
+  manualInput.addEventListener("keydown", event => {
+    if (event.key === "Enter") {
+      addBarcode(manualInput.value);
+    }
+  });
+
+  searchInput.addEventListener("input", renderBarcodes);
+
+  window.addEventListener("beforeunload", stopScanner);
+
+  renderBarcodes();
+</script>
+
+</body>
+</html>
